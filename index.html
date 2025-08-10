@@ -174,8 +174,9 @@
             };
             
             return (
-                <div className="min-h-screen flex flex-col md:flex-row">
-                    <nav className="bg-white md:w-64 p-4 flex md:flex-col justify-between md:justify-start shadow-lg border-r border-gray-200">
+                <div className="md:flex md:min-h-screen">
+                    {/* Sidebar for Desktop */}
+                    <nav className="hidden md:flex md:flex-col md:w-64 bg-white p-4 justify-between shadow-lg border-r border-gray-200">
                         <div>
                             <h1 className="text-xl font-bold text-blue-600 mb-2">JUMADI</h1>
                             <p className="text-xs text-gray-500 mb-8">Jurnal Mengajar Digital</p>
@@ -190,19 +191,36 @@
                             </ul>
                         </div>
                         <div className="text-center">
-                            <div className="text-xs text-gray-400 mb-4 hidden md:block">
+                            <div className="text-xs text-gray-400 mb-4">
                                 <p>App Developer by</p>
                                 <p className="font-semibold">Agung Kurniawan, S.Pd.</p>
                             </div>
                             <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-semibold transition-colors">
                                 {icons.logout}
-                                <span className="hidden md:inline">Keluar Aplikasi</span>
+                                <span>Keluar Aplikasi</span>
                             </button>
                         </div>
                     </nav>
-                    <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
+
+                    {/* Main Content */}
+                    <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50 pb-24 md:pb-8">
                         {renderPage()}
                     </main>
+
+                    {/* Bottom Navigation for Mobile */}
+                    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-t-lg border-t border-gray-200 z-50">
+                        <ul className="flex justify-around items-center h-16">
+                            <NavItem icon={icons.home} label="Dasbor" active={page === 'dashboard'} onClick={() => setPage('dashboard')} isMobile={true} />
+                            <NavItem icon={icons.book} label="Riwayat" active={page === 'log'} onClick={() => setPage('log')} isMobile={true} />
+                            <li className="relative -top-6">
+                                <button onClick={() => { setEditingJournal(null); setPage('form'); }} className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+                                    {React.cloneElement(icons.plus, {width: 32, height: 32})}
+                                </button>
+                            </li>
+                            <NavItem icon={icons.fileText} label="Laporan" active={page === 'report'} onClick={() => setPage('report')} isMobile={true} />
+                            <NavItem icon={icons.settings} label="Akun" active={page === 'account-settings' || page === 'school-data' || page === 'students'} onClick={() => setPage('students')} isMobile={true} />
+                        </ul>
+                    </nav>
                 </div>
             );
         }
@@ -264,7 +282,17 @@
         }
 
 
-        function NavItem({ icon, label, active, onClick }) {
+        function NavItem({ icon, label, active, onClick, isMobile = false }) {
+            if (isMobile) {
+                return (
+                    <li>
+                        <a href="#" onClick={onClick} className={`flex flex-col items-center justify-center w-16 text-center transition-colors duration-200 ${active ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'}`}>
+                            {icon}
+                            <span className="text-xs mt-1">{label}</span>
+                        </a>
+                    </li>
+                );
+            }
             return (
                 <li>
                     <a href="#" onClick={onClick} className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${active ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -367,7 +395,7 @@
             };
             
             return (
-                <div className="bg-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
+                <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-gray-800 mb-6">{editingJournal ? 'Edit Jurnal' : 'Buat Jurnal Harian Baru'}</h2>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Bagian Informasi Umum */}
