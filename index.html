@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplikasi Jurnal Mengajar Digital (JUMADI)</title>
+    
+    <!-- PWA & Mobile App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JUMADI">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQXBsaWthc2kgSnVybmFsIE1lbmdhamFyIERpZ2l0YWwgKEpV TUFESSkiLCJzaG9ydF9uYW1lIjoiSlVNQURJIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmM2Y0ZjYiLCJ0aGVtZV9jb2xvciI6IiMyNTYzZWIiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FHbDBaVDUwZUdGdGNHeGxkWFKwYm1jdmFXNWhaMlZ1ZEdsdmJpeGhkR1p2Y21sbmFXNWhiQzB3TURFeU1EQXlWQ1V5TURFeU1EQXlJZ2hpYkd4aGFXNW5JRzltWm1sbklHUnZiV3h2YzJocFpYTXVjM1J2Y21WemN5QjRiV3h1Y3owaWRtVnNkV2RzWlNCemRtVnNkWEJzWlhoWFNuUjVjR1Z6ZEdsdmJpQjNkV3hpYVd4ZlpYTXVZbTl2YkdsdVpTQm1jbTl1YjJsdVpTQnpkSGxzWlQwaWRXNXBZWGtnYzJadmNtMHRhVzFsY2lCNGJXeHVjeTBpWW1GelpXeHBibVZuYjNSbGNuUWdZMjl1ZEhKdmJHeGhibWNnWm1sc2JEMGlabWxzYkQwaVptbHNiQzQ9IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJzaXplcyI6IjE5MngxOTIifSx7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhR2wwWlQ1MGVHRnRjR3hsZFhKcGJtY3ZhVzVoWjJWdWRHbHZiaXhoZEdadmNtbG5hVzVoYkMwd01ERXlNREF5VkNVeU1ERXlNREF5SWdoaWJHeGhhVzVuSUc5bVptbG5JR1J2Yld4dmMyaHBaWE11YzNSdmNtVnpjeUI0Yld4dWN6MGlkbVZzZFdkc1pTQnplbVZzZFhCc1pYaFhTblI1Y0dWemRHbHZiaUIzZFd4aWFXeGZaWE11WW05dmJHbHVaU0JtY205dWIybHVaU0J6ZEhsc1pUMGlkVzVwWVhrZ2MyWm5jbTB0YVcxbGNpQjRiV3h1Y3kwaVltRnpaV3hwYm1WbmIzUmxjbllnWTk5dWRISnZiR3hoYm1jZ1ptbHNiQzBpWm1sc2JEMGlabWxzYkM0PSIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwic2l6ZXMiOiI1MTJ4NTEyIn1dfQ==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIHJ4PSIyNCIgZmlsbD0iIzI1NjNFQiIvPjxwYXRoIGQ9Ik0xMDggNDhWMTIwQzEwOCAxMzMuMjU1IDk3LjI1NDggMTQ0IDg0IDE0NEg3MiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -91,10 +101,35 @@
 
             return [storedValue, setValue];
         }
+
+        // Custom Hook untuk menyinkronkan state dengan sessionStorage
+        function useSessionStorage(key, initialValue) {
+            const [storedValue, setStoredValue] = React.useState(() => {
+                try {
+                    const item = window.sessionStorage.getItem(key);
+                    return item ? JSON.parse(item) : initialValue;
+                } catch (error) {
+                    console.log(error);
+                    return initialValue;
+                }
+            });
+
+            const setValue = (value) => {
+                try {
+                    const valueToStore = value instanceof Function ? value(storedValue) : value;
+                    setStoredValue(valueToStore);
+                    window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
+                } catch (error) {
+                    console.log(error);
+                }
+            };
+
+            return [storedValue, setValue];
+        }
         
         // Komponen Utama Aplikasi
         function App() {
-            const [isAuthenticated, setIsAuthenticated] = useLocalStorage('jumadiAuth', false);
+            const [isAuthenticated, setIsAuthenticated] = useSessionStorage('jumadiAuth', false);
             const [credentials, setCredentials] = useLocalStorage('jumadiCredentials', { username: 'admin', password: '12345'});
             const [page, setPage] = React.useState('dashboard');
             const [journals, setJournals] = useLocalStorage('teachingJournals', []);
