@@ -441,10 +441,11 @@
             const initialFormState = {
                 date: new Date().toISOString().split('T')[0],
                 class: '',
-                theme: '',
                 subject: '',
+                bab: '',
                 mainMaterial: '',
                 objectives: '',
+                penilaian: '',
                 processNotes: '',
                 atmosphere: 'Cukup Kondusif',
                 fastLearners: '',
@@ -492,8 +493,8 @@
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                 <FormInput label="Tanggal Mengajar" type="date" name="date" value={formData.date} onChange={handleChange} required />
                                 <FormInput label="Kelas" type="text" name="class" value={formData.class} onChange={handleChange} placeholder="Contoh: IV-A" required />
-                                <FormInput label="Tema/Subtema/PB" type="text" name="theme" value={formData.theme} onChange={handleChange} placeholder="Tema 1 / Subtema 1 / PB 2" />
                                 <FormInput label="Mata Pelajaran" type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Contoh: Matematika" />
+                                <FormInput label="Bab" type="text" name="bab" value={formData.bab} onChange={handleChange} placeholder="Contoh: Bab 1 - Pecahan" />
                                 <div className="md:col-span-2">
                                   <FormTextarea label="Materi Pokok" name="mainMaterial" value={formData.mainMaterial} onChange={handleChange} rows="2" placeholder="Contoh: Manfaat energi matahari" />
                                 </div>
@@ -514,6 +515,9 @@
                             <legend className="text-lg font-medium text-gray-700 px-2">Penilaian & Catatan Siswa</legend>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                                 <FormSelect label="Suasana Kelas" name="atmosphere" value={formData.atmosphere} onChange={handleChange} options={['Sangat Kondusif', 'Cukup Kondusif', 'Kurang Kondusif']} />
+                                <div className="md:col-span-2">
+                                    <FormTextarea label="Penilaian" name="penilaian" value={formData.penilaian} onChange={handleChange} rows="3" placeholder="Contoh: Penilaian sikap (observasi), Pengetahuan (tes tulis), Keterampilan (unjuk kerja)" />
+                                </div>
                                 <FormTextarea label="Siswa Cepat Paham (Pengayaan)" name="fastLearners" value={formData.fastLearners} onChange={handleChange} rows="2" placeholder="Tulis nama siswa dan catatannya" />
                                 <FormTextarea label="Siswa Perlu Bimbingan (Remedial)" name="slowLearners" value={formData.slowLearners} onChange={handleChange} rows="2" placeholder="Tulis nama siswa dan kesulitannya" />
                                 <FormInput label="Nama Siswa Tidak Hadir" name="absentStudents" value={formData.absentStudents} onChange={handleChange} placeholder="Contoh: Budi, Ani" />
@@ -577,7 +581,7 @@
                                     <p className="font-bold text-lg text-gray-800">
                                         {new Date(journal.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                     </p>
-                                    <p className="text-gray-600">Kelas {journal.class} - {journal.theme}</p>
+                                    <p className="text-gray-600">Kelas {journal.class} - {journal.bab}</p>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <button onClick={() => setSelectedJournal(journal)} className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-100">Lihat Detail</button>
@@ -608,10 +612,11 @@
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">{icons.x}</button>
                         </div>
                         <div className="space-y-4 text-gray-700">
-                            <DetailSection title="Tema/Subtema" content={journal.theme} />
+                            <DetailSection title="Bab" content={journal.bab} />
                             <DetailSection title="Mata Pelajaran" content={journal.subject} />
                             <DetailSection title="Materi Pokok" content={journal.mainMaterial} />
                             <DetailSection title="Tujuan Pembelajaran" content={journal.objectives} />
+                            <DetailSection title="Penilaian" content={journal.penilaian} />
                             <DetailSection title="Catatan Proses Pembelajaran" content={journal.processNotes} />
                             <DetailSection title="Suasana Kelas" content={journal.atmosphere} />
                             <DetailSection title="Siswa Cepat Paham (Pengayaan)" content={journal.fastLearners} />
@@ -913,7 +918,7 @@
 
             const generatePDFDoc = (journals) => {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ orientation: 'landscape' });
+                const doc = new jsPDF({ orientation: 'portrait' });
                 
                 doc.setFont("helvetica", "bold");
                 doc.text("JURNAL PELAKSANAAN PEMBELAJARAN HARIAN", doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
@@ -922,54 +927,51 @@
                 doc.setFontSize(10);
                 
                 const reportClass = journals.length > 0 ? journals[0].class : '';
+                const reportSubject = journals.length > 0 ? journals[0].subject : '';
+                const reportBab = journals.length > 0 ? journals[0].bab : '';
 
                 const headerY = 25;
                 doc.text(`Nama Guru`, 14, headerY);
                 doc.text(`: ${schoolData.teacherName || ''}`, 50, headerY);
-                doc.text(`Sekolah`, doc.internal.pageSize.getWidth() / 2, headerY);
-                doc.text(`: ${schoolData.schoolName || ''}`, doc.internal.pageSize.getWidth() / 2 + 36, headerY);
+                doc.text(`Sekolah`, 14, headerY + 5);
+                doc.text(`: ${schoolData.schoolName || ''}`, 50, headerY + 5);
                 
-                doc.text(`Kelas/Semester`, 14, headerY + 5);
-                doc.text(`: ${reportClass} / ${schoolData.semester || ''}`, 50, headerY + 5);
+                doc.text(`Kelas/Semester`, doc.internal.pageSize.getWidth() / 2, headerY);
+                doc.text(`: ${reportClass} / ${schoolData.semester || ''}`, doc.internal.pageSize.getWidth() / 2 + 36, headerY);
                 doc.text(`Tahun Ajaran`, doc.internal.pageSize.getWidth() / 2, headerY + 5);
                 doc.text(`: ${schoolData.academicYear || ''}`, doc.internal.pageSize.getWidth() / 2 + 36, headerY + 5);
 
-
-                const tableColumn = ["Hari, Tanggal", "Tema", "Mata Pelajaran", "Tujuan Pembelajaran", "Materi Pokok", "Siswa Tidak Hadir", "Ket.", "Catatan Khusus", "Refleksi Guru"];
+                const tableColumn = ["No.", "Tujuan Pembelajaran", "Materi", "Penilaian", "Hari/Tanggal"];
                 const tableRows = [];
 
-                journals.forEach(journal => {
+                journals.forEach((journal, index) => {
                     const journalData = [
-                        formatDateForReport(journal.date),
-                        journal.theme || '',
-                        journal.subject || '',
+                        index + 1,
                         journal.objectives || '',
                         journal.mainMaterial || '',
-                        journal.absentStudents || '',
-                        journal.absentReason || '',
-                        journal.specialNotes || '',
-                        journal.reflection || ''
+                        journal.penilaian || '',
+                        formatDateForReport(journal.date)
                     ];
                     tableRows.push(journalData);
                 });
 
                 doc.autoTable({
-                    head: [tableColumn],
+                    head: [
+                        [{ content: `Mata Pelajaran: ${reportSubject}`, colSpan: 5, styles: { halign: 'left', fontStyle: 'bold', fillColor: [226, 232, 240], textColor: 20 } }],
+                        [{ content: `Bab: ${reportBab}`, colSpan: 5, styles: { halign: 'left', fontStyle: 'bold', fillColor: [226, 232, 240], textColor: 20 } }],
+                        tableColumn
+                    ],
                     body: tableRows,
                     startY: headerY + 15,
                     theme: 'grid',
-                    styles: { font: 'helvetica', fontSize: 8, cellPadding: 1.5 },
+                    styles: { font: 'helvetica', fontSize: 9, cellPadding: 2 },
                     headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold', halign: 'center' },
                     columnStyles: {
-                        0: { cellWidth: 30 },
-                        1: { cellWidth: 30 },
-                        2: { cellWidth: 25 },
-                        3: { cellWidth: 40 },
-                        4: { cellWidth: 35 },
-                        5: { cellWidth: 30 },
-                        6: { cellWidth: 10 },
-                        7: { cellWidth: 40 },
-                        8: { cellWidth: 'auto' }
+                        0: { cellWidth: 10, halign: 'center' },
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 50 },
+                        3: { cellWidth: 50 },
+                        4: { cellWidth: 35 }
                     }
                 });
 
@@ -1055,29 +1057,25 @@
                         <table className="w-full text-sm text-left text-gray-500">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-100">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3">Hari, Tanggal</th>
-                                    <th scope="col" className="px-6 py-3">Tema</th>
-                                    <th scope="col" className="px-6 py-3">Mapel</th>
+                                    <th scope="col" className="px-6 py-3">No.</th>
                                     <th scope="col" className="px-6 py-3">Tujuan Pembelajaran</th>
-                                    <th scope="col" className="px-6 py-3">Siswa Tdk Hadir</th>
-                                    <th scope="col" className="px-6 py-3">Catatan Khusus</th>
-                                    <th scope="col" className="px-6 py-3">Refleksi Guru</th>
+                                    <th scope="col" className="px-6 py-3">Materi</th>
+                                    <th scope="col" className="px-6 py-3">Penilaian</th>
+                                    <th scope="col" className="px-6 py-3">Hari/Tanggal</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {journals.length > 0 ? journals.map(j => (
+                                {journals.length > 0 ? journals.map((j, index) => (
                                     <tr key={j.id} className="bg-white border-b hover:bg-gray-50">
-                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{formatDateForReport(j.date)}</td>
-                                        <td className="px-6 py-4">{j.theme}</td>
-                                        <td className="px-6 py-4">{j.subject}</td>
+                                        <td className="px-6 py-4 font-medium text-gray-900">{index + 1}</td>
                                         <td className="px-6 py-4">{j.objectives}</td>
-                                        <td className="px-6 py-4">{j.absentStudents} ({j.absentReason})</td>
-                                        <td className="px-6 py-4">{j.specialNotes}</td>
-                                        <td className="px-6 py-4">{j.reflection}</td>
+                                        <td className="px-6 py-4">{j.mainMaterial}</td>
+                                        <td className="px-6 py-4">{j.penilaian}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">{formatDateForReport(j.date)}</td>
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-8 text-gray-500">Belum ada data jurnal.</td>
+                                        <td colSpan="5" className="text-center py-8 text-gray-500">Belum ada data jurnal.</td>
                                     </tr>
                                 )}
                             </tbody>
